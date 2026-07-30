@@ -625,7 +625,7 @@
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">🏆</div>
-                    <div><strong>獲勝條件：</strong> 保持顧客體感舒適度在 <strong>70% 以上</strong> 持續 <strong>25 秒</strong> 即可獲得勝利！</div>
+                    <div><strong>獲勝條件：</strong> 保持顧客體感舒適度在 <strong>60% 以上</strong> 持續 <strong>25 秒</strong> 即可獲得勝利！</div>
                 </div>
             </div>
             <button class="btn btn-primary" style="width: 100%; padding: 12px;" id="btn-close-instructions">我知道了，開始體驗</button>
@@ -749,7 +749,7 @@
             <!-- Goal Banner -->
             <div class="goal-box">
                 <div>
-                    <div class="goal-text">🏆 勝利目標：維持舒適度 ≥ 70%</div>
+                    <div class="goal-text">🏆 勝利目標：維持舒適度 ≥ 60%</div>
                     <div style="font-size: 11px; color: #B45309;">目標最佳溫度：<span id="ui-ideal-target-text">22.0°C</span></div>
                 </div>
                 <div class="goal-timer" id="ui-goal-timer">0 / 25s</div>
@@ -1649,8 +1649,8 @@
 
             soundFX.updateWindSound(gameState.powerOn, gameState.fanSpeed);
 
-            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯
-            if (gameState.comfortScore >= 70.0) {
+            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯（改為 60.0% 以上即可累計勝利秒數）
+            if (gameState.comfortScore >= 60.0) {
                 gameState.holdTimer += 0.016;
                 if (gameState.holdTimer >= 25.0) {
                     triggerVictory();
@@ -1665,7 +1665,7 @@
                     gameState.holdTimer = Math.max(0, gameState.holdTimer - decayRate);
                 }
             } else {
-                // 舒適度介於 50% ~ 70% 時：常態微幅減退
+                // 舒適度介於 50% ~ 60% 時：常態微幅減退
                 gameState.holdTimer = Math.max(0, gameState.holdTimer - 0.005);
             }
         }
