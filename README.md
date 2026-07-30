@@ -586,7 +586,7 @@
             </svg>
         </div>
         <h1 class="logo-title">Smart AC Simulator</h1>
-        <p class="logo-subtitle">智慧空調溫控模擬器</p>
+        <p class="logo-subtitle">智慧空調溫控模擬器 (7秒緩衝保護版)</p>
 
         <div class="cover-hero-box">
             <canvas id="cover-canvas" width="480" height="220"></canvas>
@@ -604,8 +604,12 @@
             <div class="modal-header">遊戲規則與操作指南</div>
             <div class="modal-body">
                 <div class="instruction-item">
+                    <div class="instruction-icon">🛡️</div>
+                    <div><strong>7秒緩衝機制：</strong> 當舒適度降至 <strong>50% 以下</strong> 時，系統會啟動 <strong>7 秒緩衝保護期</strong>。緩衝期間勝利秒數不受扣減，超過 7 秒後將開始加速倒扣！</div>
+                </div>
+                <div class="instruction-item">
                     <div class="instruction-icon">🌤️</div>
-                    <div><strong>天氣與模式匹配：</strong> 天氣每 <strong>15 秒</strong> 切換。<strong>強烈寒流需開【暖氣】、炎熱酷暑需開【冷氣】、夏日陣雨需開【除濕】、怡人微風需開【送風】</strong>，若模式不符會嚴重降低體感舒適度！</div>
+                    <div><strong>天氣與模式匹配：</strong> 天氣每 <strong>15 秒</strong> 切換。<strong>強烈寒流需開【暖氣】、炎熱酷暑需開【冷氣】、夏日陣雨需開【除濕】、怡人微風需開【送風】</strong>。</div>
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">🎛️</div>
@@ -613,7 +617,7 @@
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">⚠️</div>
-                    <div><strong>突發故障與 QTE 維修：</strong> 每 10 秒觸發一次！包括機件故障（對準區域按按鈕修復）、微型濾網灰塵（點擊微小灰塵）、高壓水槍沖洗（按住加壓水柱持續噴洗並觀看滴水動畫）。</div>
+                    <div><strong>突發故障與 QTE 維修：</strong> 每 10 秒觸發一次！包含機件故障、微型濾網灰塵與高壓水槍沖洗。</div>
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">⏱️</div>
@@ -870,19 +874,15 @@
 
     <script>
         /**
-         * Smart AC Simulator Engine
-         * Vanilla JS + Web Audio API + Canvas 2D
+         * Smart AC Simulator Engine (With 7-Second Buffer Period)
          */
 
-        // --- Weather Presets ---
         const WEATHERS = [
             { id: 'sun', name: '酷暑炎熱', icon: '☀️', outdoorTemp: 36.0, targetIdealTemp: 22.0, requiredMode: 'cool', requiredModeName: '冷氣', desc: '外頭陽光酷熱曝曬，目標舒適溫度為 22.0°C' },
             { id: 'rain', name: '夏日陣雨', icon: '🌦️', outdoorTemp: 31.0, targetIdealTemp: 24.0, requiredMode: 'dry', requiredModeName: '除濕', desc: '室外濕熱潮濕，目標舒適溫度為 24.0°C' },
             { id: 'autumn', name: '秋高氣爽', icon: '🌤️', outdoorTemp: 27.0, targetIdealTemp: 25.0, requiredMode: 'cool', requiredModeName: '冷氣', desc: '天氣舒適宜人，目標舒適溫度為 25.0°C' },
             { id: 'cold', name: '強烈寒流', icon: '❄️', outdoorTemp: 11.0, targetIdealTemp: 26.0, requiredMode: 'heat', requiredModeName: '暖氣', desc: '室外寒風刺骨，目標舒適溫度為 26.0°C' },
             { id: 'heatwave', name: '極致悶熱', icon: '🔥', outdoorTemp: 38.5, targetIdealTemp: 20.0, requiredMode: 'cool', requiredModeName: '冷氣', desc: '氣溫創新高，目標舒適溫度為 20.0°C' },
-            
-            // --- 隨機天氣 ---
             { id: 'plum_rain', name: '梅雨時節', icon: '🌧️', outdoorTemp: 24.0, targetIdealTemp: 24.0, requiredMode: 'dry', requiredModeName: '除濕', desc: '梅雨季雨水綿綿、極度潮濕，目標舒適溫度為 24.0°C' },
             { id: 'typhoon', name: '颱風襲來', icon: '🌀', outdoorTemp: 28.0, targetIdealTemp: 23.5, requiredMode: 'dry', requiredModeName: '除濕', desc: '狂風暴雨帶來濃重濕氣，目標舒適溫度為 23.5°C' },
             { id: 'blizzard', name: '霸王級寒流', icon: '☃️', outdoorTemp: 5.0, targetIdealTemp: 27.0, requiredMode: 'heat', requiredModeName: '暖氣', desc: '極端冰凍低溫來襲，目標舒適溫度為 27.0°C' },
@@ -893,7 +893,6 @@
             { id: 'auto_pleasant', name: '智慧怡人', icon: '☘️', outdoorTemp: 26.5, targetIdealTemp: 24.5, requiredMode: 'auto', requiredModeName: '自動', desc: '天氣舒適宜人，建議開啟智慧自動模式維持 24.5°C' }
         ];
 
-        // --- Sound Engine (Web Audio API) ---
         class SoundFX {
             constructor() {
                 this.ctx = null;
@@ -998,54 +997,51 @@
 
         const soundFX = new SoundFX();
 
-        // --- Game State ---
+        // Game State
         const gameState = {
             powerOn: false,
             indoorTemp: 28.0,
-            targetTemp: 24,         // User AC setting
-            targetIdealTemp: 22.0,  // Customer target comfortable temperature
+            targetTemp: 24,
+            targetIdealTemp: 22.0,
             outdoorTemp: 35.0,
             weather: WEATHERS[0],
-            weatherTimer: 0,        // Timer for weather change
+            weatherTimer: 0,
             humidity: 65,
-            mode: 'cool',           // 'cool', 'heat', 'fan', 'dry', 'auto'
-            fanSpeed: 3,            // 1 to 5
+            mode: 'cool',
+            fanSpeed: 3,
             swing: false,
             powerUsage: 0,
             comfortScore: 60,
-            holdTimer: 0,           // Victory timer (need 25s)
-            lowComfortTimer: 0,     // Lose timer when comfort < 50% (50s threshold)
+            holdTimer: 0,
+            lowComfortTimer: 0,
+            bufferPeriod: 7.0,      // 7秒緩衝期設定
             isGameWon: false,
             isGameOver: false,
             
-            // Breakdown & QTE system
             isBroken: false,
-            breakdownType: 'timing',// 'timing', 'filter', or 'wash'
-            coolingEfficiency: 1.0, // Drops when broken
+            breakdownType: 'timing',
+            coolingEfficiency: 1.0,
             breakdownCheckTimer: 0,
             
-            // Timing QTE
             qte: {
                 active: false,
                 stage: 1,
                 maxStages: 3,
-                failCount: 0,       // Failed attempts count (max 3)
-                pointerPos: 0,      // 0 to 100
+                failCount: 0,
+                pointerPos: 0,
                 dir: 1,
                 speed: 1.8,
                 targetMin: 40,
                 targetMax: 60
             },
 
-            // Filter Cleaning QTE
             filterQTE: {
                 active: false,
                 timeLeft: 10.0,
-                dustList: [],       // Dust spots
+                dustList: [],
                 totalDust: 10
             },
 
-            // Water Washing QTE
             waterQTE: {
                 active: false,
                 timeLeft: 12.0,
@@ -1062,7 +1058,6 @@
             modeNames: { cool: '冷氣', heat: '暖氣', fan: '送風', dry: '除濕', auto: '自動' }
         };
 
-        // --- Random Weather Generator ---
         function setRandomWeather() {
             let nextWeather;
             do {
@@ -1080,11 +1075,10 @@
             document.getElementById('ui-ideal-target-text').innerText = `${nextWeather.targetIdealTemp.toFixed(1)}°C`;
         }
 
-        // --- Breakdown & QTE System ---
         function triggerBreakdown() {
             if (gameState.isBroken || !gameState.powerOn) return;
             gameState.isBroken = true;
-            gameState.coolingEfficiency = 0.5; // 故障觸發時，效能立即調降至 50%
+            gameState.coolingEfficiency = 0.5;
             
             const rand = Math.random();
             if (rand < 0.35) {
@@ -1124,7 +1118,6 @@
             }
         }
 
-        // --- Timing QTE Modal ---
         function openTimingQTEModal() {
             soundFX.init();
             soundFX.playBeep();
@@ -1158,12 +1151,10 @@
             soundFX.init();
             const pos = gameState.qte.pointerPos;
             
-            // Hit Green Zone
             if (pos >= gameState.qte.targetMin && pos <= gameState.qte.targetMax) {
                 soundFX.playBeep(1200, 'sine', 0.15);
                 gameState.qte.stage++;
                 if (gameState.qte.stage > gameState.qte.maxStages) {
-                    // Success Repair!
                     gameState.qte.active = false;
                     gameState.isBroken = false;
                     gameState.coolingEfficiency = 1.0;
@@ -1174,13 +1165,11 @@
                     resetQTETarget();
                 }
             } else {
-                // Miss Zone
                 gameState.qte.failCount++;
                 soundFX.playBeep(250, 'sawtooth', 0.2);
                 updateQTEFailUI();
 
                 if (gameState.qte.failCount >= 3) {
-                    // Failed 3 times -> Repair Failed!
                     gameState.qte.active = false;
                     triggerGameOver("維修失敗！QTE 維修連續偏離目標區域達 3 次！");
                 }
@@ -1200,7 +1189,6 @@
             document.getElementById('ui-qte-pointer').style.left = `${gameState.qte.pointerPos}%`;
         }
 
-        // --- Filter Cleaning QTE ---
         function openFilterQTEModal() {
             soundFX.init();
             soundFX.playBeep();
@@ -1232,7 +1220,7 @@
         function updateFilterQTELoop() {
             if (!gameState.filterQTE.active) return;
 
-            gameState.filterQTE.timeLeft -= 0.016; // 60fps delta
+            gameState.filterQTE.timeLeft -= 0.016;
             if (gameState.filterQTE.timeLeft <= 0) {
                 gameState.filterQTE.timeLeft = 0;
                 gameState.filterQTE.active = false;
@@ -1259,11 +1247,9 @@
 
             ctx.clearRect(0, 0, w, h);
 
-            // Mesh Background
             ctx.fillStyle = '#1E293B';
             ctx.fillRect(0, 0, w, h);
 
-            // Mesh Grid Lines
             ctx.strokeStyle = '#334155';
             ctx.lineWidth = 1.5;
             for (let x = 0; x < w; x += 14) {
@@ -1273,12 +1259,10 @@
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
             }
 
-            // Outer Frame
             ctx.strokeStyle = '#64748B';
             ctx.lineWidth = 8;
             ctx.strokeRect(0, 0, w, h);
 
-            // Render Dust Spots
             gameState.filterQTE.dustList.forEach(d => {
                 if (!d.cleaned) {
                     ctx.fillStyle = '#78716C';
@@ -1294,7 +1278,6 @@
             });
         }
 
-        // Filter Dust Mouse Click
         document.getElementById('filter-canvas').addEventListener('mousedown', (e) => {
             if (!gameState.filterQTE.active) return;
             soundFX.init();
@@ -1322,7 +1305,6 @@
             if (hit) {
                 const remaining = gameState.filterQTE.dustList.filter(d => !d.cleaned).length;
                 if (remaining === 0) {
-                    // Filter Cleaned Success!
                     gameState.filterQTE.active = false;
                     gameState.isBroken = false;
                     gameState.coolingEfficiency = 1.0;
@@ -1335,7 +1317,6 @@
             }
         });
 
-        // --- Water Washing QTE ---
         function openWaterQTEModal() {
             soundFX.init();
             soundFX.playBeep();
@@ -1365,19 +1346,16 @@
                 return;
             }
 
-            // 按住加壓，放開減壓
             if (wQTE.isHolding) {
                 wQTE.pressure = Math.min(100, wQTE.pressure + 2.2);
             } else {
                 wQTE.pressure = Math.max(0, wQTE.pressure - 2.5);
             }
 
-            // 在綠色目標水壓區間內累積沖洗進度
             if (wQTE.pressure >= wQTE.targetMin && wQTE.pressure <= wQTE.targetMax) {
                 wQTE.progress = Math.min(100, wQTE.progress + 0.35);
             }
 
-            // 沖洗完成條件
             if (wQTE.progress >= 100) {
                 wQTE.active = false;
                 gameState.isBroken = false;
@@ -1406,11 +1384,9 @@
 
             ctx.clearRect(0, 0, w, h);
 
-            // 畫面背景
             ctx.fillStyle = '#0F172A';
             ctx.fillRect(0, 0, w, h);
 
-            // 中央濾網網格
             const filterX = 120;
             const filterY = 30;
             const filterW = 200;
@@ -1428,19 +1404,16 @@
                 ctx.beginPath(); ctx.moveTo(filterX, y); ctx.lineTo(filterX + filterW, y); ctx.stroke();
             }
 
-            // 濾網上的頑固泥垢
             const dirtAlpha = Math.max(0, 1 - wQTE.progress / 100);
             if (dirtAlpha > 0) {
                 ctx.fillStyle = `rgba(120, 80, 40, ${dirtAlpha * 0.85})`;
                 ctx.fillRect(filterX, filterY, filterW, filterH);
             }
 
-            // 濾網外框
             ctx.strokeStyle = '#64748B';
             ctx.lineWidth = 4;
             ctx.strokeRect(filterX, filterY, filterW, filterH);
 
-            // 高壓噴槍嘴
             const nozzleX = 30;
             const nozzleY = 30;
             ctx.fillStyle = '#94A3B8';
@@ -1448,7 +1421,6 @@
             ctx.fillStyle = '#0284C7';
             ctx.fillRect(nozzleX + 20, nozzleY - 6, 12, 12);
 
-            // 產生水柱噴射粒子
             if (wQTE.pressure > 0) {
                 const streamCount = Math.floor(wQTE.pressure / 15) + 1;
                 for (let i = 0; i < streamCount; i++) {
@@ -1463,7 +1435,6 @@
                 }
             }
 
-            // 繪製水柱動態
             for (let i = wQTE.streamParticles.length - 1; i >= 0; i--) {
                 const p = wQTE.streamParticles[i];
                 p.x += p.vx;
@@ -1494,7 +1465,6 @@
                 }
             }
 
-            // 繪製滴水動畫
             for (let i = wQTE.dripParticles.length - 1; i >= 0; i--) {
                 const dp = wQTE.dripParticles[i];
                 dp.y += dp.vy;
@@ -1511,7 +1481,6 @@
                 }
             }
 
-            // 下方水壓控制指示條
             const barX = 40;
             const barY = 175;
             const barW = 360;
@@ -1574,18 +1543,18 @@
             }
         });
 
-        // --- Physics & Physics Loop ---
+        // --- Physics & Logic Loop ---
         function updateThermalPhysics() {
             if (gameState.isGameOver || gameState.isGameWon) return;
 
-            // 【設定：天氣切換改為 15 秒一次】
+            // 天氣每 15 秒切換
             gameState.weatherTimer += 0.016;
             if (gameState.weatherTimer >= 15.0) {
                 gameState.weatherTimer = 0;
                 setRandomWeather();
             }
 
-            // 【設定：維修事件 10 秒觸發一次】
+            // 維修事件 10 秒觸發一次
             if (gameState.powerOn && !gameState.isBroken) {
                 gameState.breakdownCheckTimer += 0.016;
                 if (gameState.breakdownCheckTimer >= 10.0) {
@@ -1611,7 +1580,6 @@
                     targetEffectiveTemp = gameState.targetIdealTemp;
                 }
 
-                // 冷氣運轉能力受衰減係數 (coolingEfficiency) 直接影響
                 const speedFactor = (0.005 + (gameState.fanSpeed * 0.003)) * gameState.coolingEfficiency;
                 
                 if (gameState.mode === 'cool' || (gameState.mode === 'auto' && gameState.indoorTemp > gameState.targetIdealTemp)) {
@@ -1669,6 +1637,7 @@
 
             gameState.comfortScore = Math.max(0, Math.min(100, score));
 
+            // 低體感滿意度計時器
             if (gameState.comfortScore < 50.0) {
                 gameState.lowComfortTimer += 0.016;
                 if (gameState.lowComfortTimer >= 50.0) {
@@ -1680,23 +1649,24 @@
 
             soundFX.updateWindSound(gameState.powerOn, gameState.fanSpeed);
 
-            // 【設定：成功條件為維持舒適度 ≥ 70% 持續 25 秒】
+            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯
             if (gameState.comfortScore >= 70.0) {
                 gameState.holdTimer += 0.016;
                 if (gameState.holdTimer >= 25.0) {
                     triggerVictory();
                 }
             } else if (gameState.comfortScore < 50.0) {
-                // 當舒適度低於 50% 時：勝利秒數先緩降，隨後加速下降
-                let decayRate = 0.005; // 初始緩降速度 (微幅扣減)
-                if (gameState.lowComfortTimer > 1.5) {
-                    // 超過 1.5 秒後，依據時間倍率遞增加速扣降
-                    decayRate += (gameState.lowComfortTimer - 1.5) * 0.025;
+                // 當舒適度低於 50% 時：啟動 7 秒緩衝保護期
+                if (gameState.lowComfortTimer <= gameState.bufferPeriod) {
+                    // 🛡️ 7秒緩衝期內：勝利秒數受保護，凍結不扣減
+                } else {
+                    // 超過 7 秒緩衝期後：開始懲罰性加速扣降進度
+                    let decayRate = 0.005 + (gameState.lowComfortTimer - gameState.bufferPeriod) * 0.025;
+                    gameState.holdTimer = Math.max(0, gameState.holdTimer - decayRate);
                 }
-                gameState.holdTimer = Math.max(0, gameState.holdTimer - decayRate);
             } else {
-                // 舒適度介於 50% ~ 70% 時：維持一般的微幅扣減
-                gameState.holdTimer = Math.max(0, gameState.holdTimer - 0.01);
+                // 舒適度介於 50% ~ 70% 時：常態微幅減退
+                gameState.holdTimer = Math.max(0, gameState.holdTimer - 0.005);
             }
         }
 
@@ -1720,16 +1690,20 @@
                 document.getElementById('ui-comfort-bar').style.background = '#F44336';
             }
 
+            // ⚠️ 低舒適度與 7秒緩衝期 提示邏輯
             const warningBox = document.getElementById('ui-warning-box');
             if (gameState.comfortScore < 50.0) {
                 warningBox.classList.add('active');
                 const remaining = Math.max(0, 50.0 - gameState.lowComfortTimer);
                 document.getElementById('ui-low-comfort-timer').innerText = `${remaining.toFixed(1)}s`;
                 
-                if (gameState.powerOn && gameState.mode !== gameState.weather.requiredMode) {
-                    document.getElementById('ui-warning-reason').innerText = `⚠️ 模式不符合當前天氣！請換至【${gameState.weather.requiredModeName}】模式！`;
+                if (gameState.lowComfortTimer <= gameState.bufferPeriod) {
+                    const bufRemain = (gameState.bufferPeriod - gameState.lowComfortTimer).toFixed(1);
+                    document.getElementById('ui-warning-reason').innerText = `🛡️ 【7秒緩衝期】生效中 (剩數 ${bufRemain}s)，請儘速調整溫度與模式！`;
+                } else if (gameState.powerOn && gameState.mode !== gameState.weather.requiredMode) {
+                    document.getElementById('ui-warning-reason').innerText = `⚠️ 緩衝期已結束！模式不符當前天氣，請切換至【${gameState.weather.requiredModeName}】！`;
                 } else {
-                    document.getElementById('ui-warning-reason').innerText = `請儘速調整溫度，否則顧客即將離開！`;
+                    document.getElementById('ui-warning-reason').innerText = `⚠️ 緩衝期已結束！體感持續過低，勝利進度快速倒扣中！`;
                 }
             } else {
                 warningBox.classList.remove('active');
@@ -1791,11 +1765,11 @@
 
             ctx.clearRect(0, 0, w, h);
 
-            // 1. Wall Background
+            // Wall Background
             ctx.fillStyle = '#E2E8F0';
             ctx.fillRect(0, 0, w, h);
 
-            // 2. Floor
+            // Floor
             const floorY = h * 0.72;
             ctx.fillStyle = '#CBD5E1';
             ctx.fillRect(0, floorY, w, h - floorY);
@@ -1809,7 +1783,7 @@
                 ctx.stroke();
             }
 
-            // 3. Window & Weather View
+            // Window & Weather View
             const winX = w * 0.08;
             const winY = h * 0.12;
             const winW = w * 0.32;
@@ -1855,7 +1829,7 @@
             ctx.lineTo(winX + winW / 2, winY + winH);
             ctx.stroke();
 
-            // 4. Plant
+            // Plant
             const plantX = w * 0.06;
             const plantY = floorY - 10;
             ctx.fillStyle = '#D97706';
@@ -1875,7 +1849,7 @@
             ctx.ellipse(plantX + 35, plantY - 25, 14, 28 + sway, 0.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // 5. Sofa & Character
+            // Sofa & Character
             const sofaX = w * 0.45;
             const sofaY = floorY - 60;
             const sofaW = w * 0.42;
@@ -1892,7 +1866,7 @@
 
             drawCharacter(sofaX + sofaW * 0.5, sofaY + 10);
 
-            // 6. Wall AC Unit
+            // AC Unit
             const acX = w * 0.52;
             const acY = h * 0.12;
             const acW = w * 0.38;
@@ -1940,7 +1914,7 @@
             ctx.fillRect(0, 0, acW - 30, 6);
             ctx.restore();
 
-            // 7. Wind Particles
+            // Wind Particles
             if (gameState.powerOn && louverAngle > 5) {
                 const spawnChance = gameState.isBroken ? 0.2 * gameState.coolingEfficiency : 0.6;
                 if (Math.random() < spawnChance) {
@@ -1972,7 +1946,6 @@
                 ctx.fill();
             }
 
-            // 8. Render Confetti if Won
             if (gameState.isGameWon) {
                 renderConfetti(w, h);
             }
@@ -2178,11 +2151,9 @@
             resetGame();
         });
 
-        // QTE Trigger Events
         document.getElementById('btn-trigger-qte').addEventListener('click', openRepairModal);
         document.getElementById('btn-qte-action').addEventListener('click', handleQTEClick);
 
-        // Manual Controls
         document.getElementById('btn-power-toggle').addEventListener('click', () => {
             soundFX.init();
             gameState.powerOn = !gameState.powerOn;
@@ -2236,7 +2207,6 @@
             updateUI();
         });
 
-        // Ripple Effect
         document.querySelectorAll('.btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 const circle = document.createElement('span');
@@ -2255,7 +2225,6 @@
             });
         });
 
-        // --- Main Game Loop (60 FPS) ---
         function gameLoop() {
             updateThermalPhysics();
             updateQTELoop();
@@ -2266,7 +2235,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Init
         resizeCanvas();
         requestAnimationFrame(gameLoop);
     </script>
