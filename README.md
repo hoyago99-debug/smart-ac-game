@@ -756,7 +756,7 @@
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">🏆</div>
-                    <div><strong>獲勝條件：</strong> 保持顧客體感舒適度在 <strong>60% 以上</strong> 持續 <strong>25 秒</strong> 即可獲得勝利！</div>
+                    <div><strong>獲勝條件：</strong> 保持顧客體感舒適度在 <strong>60% 以上</strong> 持續 <strong>35 秒</strong> 即可獲得勝利！</div>
                 </div>
             </div>
             <button class="btn btn-primary" style="width: 100%; padding: 12px;" id="btn-close-instructions">我知道了，開始體驗</button>
@@ -769,7 +769,7 @@
             <div style="font-size: 50px; margin-bottom: 10px;">🎉</div>
             <div class="modal-header" style="color: var(--success);">Mission Complete!</div>
             <p style="font-size: 15px; color: var(--text-sub); margin-bottom: 20px;" id="txt-victory-msg">
-                恭喜！你成功維持顧客舒適環境長達 25 秒！
+                恭喜！你成功維持顧客舒適環境長達 35 秒！
             </p>
             <button class="btn btn-primary" style="width: 100%; padding: 12px;" id="btn-restart-game">再玩一次</button>
         </div>
@@ -883,7 +883,7 @@
                     <div class="goal-text">🏆 勝利目標：維持舒適度 ≥ 60%</div>
                     <div style="font-size: 10px; color: #B45309;">目標最佳溫度：<span id="ui-ideal-target-text">22.0°C</span></div>
                 </div>
-                <div class="goal-timer" id="ui-goal-timer">0 / 25s</div>
+                <div class="goal-timer" id="ui-goal-timer">0 / 35s</div>
             </div>
 
             <!-- Low Comfort Danger Countdown Banner -->
@@ -1789,10 +1789,10 @@
 
             soundFX.updateWindSound(gameState.powerOn, gameState.fanSpeed);
 
-            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯
+            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯（更新為 35 秒）
             if (gameState.comfortScore >= 60.0) {
                 gameState.holdTimer += 0.016;
-                if (gameState.holdTimer >= 25.0) {
+                if (gameState.holdTimer >= 35.0) {
                     triggerVictory();
                 }
             } else if (gameState.comfortScore < 50.0) {
@@ -1877,7 +1877,7 @@
                 pBtn.classList.remove('active');
             }
 
-            document.getElementById('ui-goal-timer').innerText = `${Math.min(25, Math.floor(gameState.holdTimer))} / 25s`;
+            document.getElementById('ui-goal-timer').innerText = `${Math.min(35, Math.floor(gameState.holdTimer))} / 35s`;
         }
 
         // --- Canvas Rendering Loop (Living Room) ---
@@ -2163,7 +2163,7 @@
         function triggerVictory() {
             gameState.isGameWon = true;
             soundFX.playChime(true);
-            document.getElementById('txt-victory-msg').innerText = `恭喜！你成功維持顧客目標舒適度長達 25 秒！`;
+            document.getElementById('txt-victory-msg').innerText = `恭喜！你成功維持顧客目標舒適度長達 35 秒！`;
             document.getElementById('victory-modal').classList.add('active');
 
             for (let i = 0; i < 80; i++) {
