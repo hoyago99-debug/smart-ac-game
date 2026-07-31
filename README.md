@@ -111,6 +111,7 @@
             gap: 12px;
             overflow-y: auto;
             padding-right: 4px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .panel-column::-webkit-scrollbar {
@@ -553,7 +554,7 @@
             box-shadow: 0 4px 14px rgba(33, 150, 243, 0.3);
         }
 
-        /* Responsive Adjustments for Mobile View - Strict Single Screen Height */
+        /* Responsive Adjustments for Mobile View - Enabled Control Panel Scrolling */
         @media (max-width: 900px) {
             #app-container {
                 flex-direction: column;
@@ -587,10 +588,19 @@
                 flex: 1;
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
-                overflow-y: hidden;
-                gap: 6px;
-                padding-right: 0;
+                justify-content: flex-start; /* 開啟自然滑動，不強制擠壓 */
+                overflow-y: auto;          /* 允許手機版垂直滾動 */
+                -webkit-overflow-scrolling: touch;
+                gap: 8px;
+                padding-right: 2px;
+            }
+
+            .panel-column::-webkit-scrollbar {
+                width: 3px;
+            }
+            .panel-column::-webkit-scrollbar-thumb {
+                background: #CBD5E1;
+                border-radius: 3px;
             }
 
             .card {
@@ -1266,7 +1276,6 @@
         }
 
         function resetQTETarget() {
-            // 基礎綠條寬度從 20% 加長至 35%
             const width = 35 - (gameState.qte.stage - 1) * 3;
             const min = 10 + Math.random() * (80 - width);
             gameState.qte.targetMin = min;
@@ -1489,7 +1498,6 @@
                 wQTE.progress = Math.min(100, wQTE.progress + 0.35);
             }
 
-            // 修改：達到 80% 即可完成沖洗
             if (wQTE.progress >= 80) {
                 wQTE.active = false;
                 gameState.isBroken = false;
@@ -1791,7 +1799,7 @@
 
             soundFX.updateWindSound(gameState.powerOn, gameState.fanSpeed);
 
-            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯（更新為 35 秒）
+            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯
             if (gameState.comfortScore >= 60.0) {
                 gameState.holdTimer += 0.016;
                 if (gameState.holdTimer >= 35.0) {
