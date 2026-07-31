@@ -802,7 +802,7 @@
                     <span id="ui-qte-fails" style="color: #EF4444;">失敗次數：0 / 3</span>
                 </div>
                 <div class="qte-track">
-                    <div class="qte-target-zone" id="ui-qte-target" style="left: 40%; width: 20%;"></div>
+                    <div class="qte-target-zone" id="ui-qte-target" style="left: 32.5%; width: 35%;"></div>
                     <div class="qte-pointer" id="ui-qte-pointer" style="left: 0%;"></div>
                 </div>
             </div>
@@ -1163,8 +1163,8 @@
                 pointerPos: 0,
                 dir: 1,
                 speed: 1.8,
-                targetMin: 40,
-                targetMax: 60
+                targetMin: 32.5,
+                targetMax: 67.5
             },
 
             filterQTE: {
@@ -1266,8 +1266,9 @@
         }
 
         function resetQTETarget() {
-            const width = 20 - (gameState.qte.stage - 1) * 3;
-            const min = 15 + Math.random() * (70 - width);
+            // 基礎綠條寬度從 20% 加長至 35%
+            const width = 35 - (gameState.qte.stage - 1) * 3;
+            const min = 10 + Math.random() * (80 - width);
             gameState.qte.targetMin = min;
             gameState.qte.targetMax = min + width;
             gameState.qte.speed = 1.5 + gameState.qte.stage * 0.6;
@@ -1488,7 +1489,8 @@
                 wQTE.progress = Math.min(100, wQTE.progress + 0.35);
             }
 
-            if (wQTE.progress >= 100) {
+            // 修改：達到 80% 即可完成沖洗
+            if (wQTE.progress >= 80) {
                 wQTE.active = false;
                 gameState.isBroken = false;
                 gameState.coolingEfficiency = 1.0;
@@ -1503,7 +1505,7 @@
 
         function updateWaterQTEUI() {
             document.getElementById('ui-water-timer').innerText = `⏱️ 剩餘時間: ${gameState.waterQTE.timeLeft.toFixed(1)}s`;
-            document.getElementById('ui-water-progress').innerText = `💧 清潔進度: ${Math.floor(gameState.waterQTE.progress)}%`;
+            document.getElementById('ui-water-progress').innerText = `💧 清潔進度: ${Math.floor(gameState.waterQTE.progress)}% / 80%`;
         }
 
         function drawWaterQTE() {
@@ -1536,7 +1538,7 @@
                 ctx.beginPath(); ctx.moveTo(filterX, y); ctx.lineTo(filterX + filterW, y); ctx.stroke();
             }
 
-            const dirtAlpha = Math.max(0, 1 - wQTE.progress / 100);
+            const dirtAlpha = Math.max(0, 1 - wQTE.progress / 80);
             if (dirtAlpha > 0) {
                 ctx.fillStyle = `rgba(120, 80, 40, ${dirtAlpha * 0.85})`;
                 ctx.fillRect(filterX, filterY, filterW, filterH);
