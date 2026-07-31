@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Smart AC Simulator - 智慧空調溫控模擬器</title>
     <style>
         :root {
@@ -28,15 +28,21 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: var(--bg-main);
+            color: var(--text-main);
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
         }
 
         /* App Container */
@@ -46,9 +52,12 @@
             width: 100%;
             max-width: 1440px;
             margin: 0 auto;
-            padding: 20px;
-            gap: 20px;
-            height: 100vh;
+            padding: 16px;
+            gap: 16px;
+            height: 100dvh;
+            max-height: 100dvh;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         /* Room Column (Left) */
@@ -71,20 +80,20 @@
 
         .room-overlay-info {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 16px;
+            left: 16px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             z-index: 10;
         }
 
         .badge {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(8px);
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.06);
             display: flex;
             align-items: center;
@@ -99,13 +108,13 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             overflow-y: auto;
             padding-right: 4px;
         }
 
         .panel-column::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
         .panel-column::-webkit-scrollbar-thumb {
             background: #CBD5E1;
@@ -115,16 +124,16 @@
         .card {
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            padding: 20px;
+            padding: 16px;
             box-shadow: var(--shadow);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--text-main);
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -134,45 +143,45 @@
         .grid-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 8px;
         }
 
         .stat-box {
             background: #F8FAFC;
             border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 8px;
             text-align: center;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-sub);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 800;
             color: var(--text-main);
         }
 
         .meter-container {
-            margin-top: 14px;
+            margin-top: 10px;
         }
 
         .meter-header {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
-            margin-bottom: 6px;
+            font-size: 12px;
+            margin-bottom: 4px;
             font-weight: 600;
         }
 
         .meter-bar {
-            height: 10px;
+            height: 8px;
             background: #E2E8F0;
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
             position: relative;
         }
@@ -180,7 +189,7 @@
         .meter-fill {
             height: 100%;
             width: 0%;
-            border-radius: 5px;
+            border-radius: 4px;
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
         }
 
@@ -189,14 +198,14 @@
             background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
             border: 1px solid #7DD3FC;
             border-radius: 12px;
-            padding: 14px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .weather-icon {
-            font-size: 38px;
+            font-size: 32px;
             line-height: 1;
         }
 
@@ -206,14 +215,14 @@
 
         .weather-title {
             font-weight: 800;
-            font-size: 16px;
+            font-size: 14px;
             color: #0369A1;
         }
 
         .weather-desc {
-            font-size: 12px;
+            font-size: 11px;
             color: #0284C7;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         /* Goal & Warning Banners */
@@ -221,20 +230,20 @@
             background: #FEF3C7;
             border: 1px solid #FDE68A;
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
         .goal-text {
-            font-size: 13px;
+            font-size: 12px;
             color: #92400E;
             font-weight: 700;
         }
 
         .goal-timer {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             color: #D97706;
         }
@@ -243,7 +252,7 @@
             background: #FEE2E2;
             border: 2px dashed #EF4444;
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 10px 14px;
             display: none;
             align-items: center;
             justify-content: space-between;
@@ -264,10 +273,10 @@
             background: #FFF1F2;
             border: 2px solid #F43F5E;
             border-radius: var(--border-radius);
-            padding: 16px;
+            padding: 12px 14px;
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             animation: bounce-in 0.3s ease;
         }
 
@@ -284,16 +293,16 @@
         .controls-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 8px;
         }
 
         .btn {
             background: #F8FAFC;
             border: 1px solid #CBD5E1;
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 10px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-main);
             cursor: pointer;
             display: flex;
@@ -399,7 +408,7 @@
             border-radius: var(--border-radius);
             width: 90%;
             max-width: 500px;
-            padding: 28px;
+            padding: 24px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             transform: translateY(20px);
             transition: transform 0.3s ease;
@@ -412,30 +421,30 @@
         }
 
         .modal-header {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             color: var(--text-main);
             text-align: center;
         }
 
         .modal-body {
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 13px;
+            line-height: 1.5;
             color: #475569;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .instruction-item {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 14px;
+            gap: 10px;
+            margin-bottom: 12px;
         }
 
         .instruction-icon {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: var(--primary-light);
             color: var(--primary-dark);
@@ -444,24 +453,25 @@
             justify-content: center;
             font-weight: bold;
             flex-shrink: 0;
+            font-size: 13px;
         }
 
         /* QTE Repair Mini Game Bar */
         .qte-container {
-            margin: 20px 0;
+            margin: 16px 0;
             background: #F1F5F9;
             border-radius: 12px;
-            padding: 20px;
+            padding: 16px;
             text-align: center;
         }
 
         .qte-track {
-            height: 32px;
+            height: 28px;
             background: #CBD5E1;
-            border-radius: 16px;
+            border-radius: 14px;
             position: relative;
             overflow: hidden;
-            margin: 16px 0;
+            margin: 12px 0;
             border: 2px solid #94A3B8;
         }
 
@@ -477,7 +487,7 @@
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 8px;
+            width: 6px;
             background: #EF4444;
             transform: translateX(-50%);
             box-shadow: 0 0 8px #EF4444;
@@ -501,27 +511,27 @@
         }
 
         .logo-title {
-            font-size: 38px;
+            font-size: 32px;
             font-weight: 900;
             color: #0369A1;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             letter-spacing: -0.5px;
         }
 
         .logo-subtitle {
-            font-size: 16px;
+            font-size: 14px;
             color: #0284C7;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             font-weight: 500;
         }
 
         .cover-hero-box {
             width: 100%;
-            max-width: 480px;
-            height: 220px;
+            max-width: 440px;
+            height: 180px;
             background: white;
             border-radius: 20px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             box-shadow: var(--shadow-hover);
             position: relative;
             overflow: hidden;
@@ -530,47 +540,168 @@
         .cover-btns {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
-            max-width: 300px;
+            max-width: 280px;
         }
 
         .btn-large {
-            padding: 16px 24px;
-            font-size: 16px;
+            padding: 14px 20px;
+            font-size: 15px;
             border-radius: 12px;
             font-weight: 700;
             box-shadow: 0 4px 14px rgba(33, 150, 243, 0.3);
         }
 
-        /* Responsive Adjustments */
+        /* Responsive Adjustments for Mobile View - Strict Single Screen Height */
         @media (max-width: 900px) {
             #app-container {
                 flex-direction: column;
-                height: auto;
-                padding: 12px;
-                gap: 12px;
+                height: 100dvh;
+                max-height: 100dvh;
+                padding: 8px;
+                gap: 6px;
+                overflow: hidden;
             }
 
             .room-column {
-                height: 380px;
+                height: 25vh;
+                min-height: 150px;
                 flex: none;
+                border-radius: 12px;
+            }
+
+            .room-overlay-info {
+                top: 8px;
+                left: 8px;
+                gap: 6px;
+            }
+
+            .badge {
+                padding: 4px 10px;
+                font-size: 11px;
+                border-radius: 12px;
             }
 
             .panel-column {
-                overflow-y: visible;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow-y: hidden;
+                gap: 6px;
+                padding-right: 0;
             }
 
-            .logo-title {
-                font-size: 28px;
+            .card {
+                padding: 8px 10px;
+                border-radius: 10px;
             }
-            
-            .logo-subtitle {
+
+            .card-title {
+                font-size: 13px;
+                margin-bottom: 6px;
+            }
+
+            .weather-box {
+                padding: 6px 10px;
+                gap: 8px;
+                border-radius: 10px;
+            }
+
+            .weather-icon {
+                font-size: 24px;
+            }
+
+            .weather-title {
+                font-size: 13px;
+            }
+
+            .weather-desc {
+                font-size: 10px;
+                margin-top: 0;
+            }
+
+            #ui-weather-req-mode {
+                font-size: 10px !important;
+                margin-top: 1px !important;
+            }
+
+            .goal-box {
+                padding: 6px 10px;
+                border-radius: 10px;
+            }
+
+            .goal-text {
+                font-size: 11px;
+            }
+
+            .goal-timer {
+                font-size: 15px;
+            }
+
+            .stat-box {
+                padding: 4px 6px;
+                border-radius: 8px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+                margin-bottom: 1px;
+            }
+
+            .stat-value {
                 font-size: 14px;
             }
 
+            .grid-stats {
+                gap: 4px;
+            }
+
+            .meter-container {
+                margin-top: 6px;
+            }
+
+            .meter-header {
+                font-size: 10px;
+                margin-bottom: 2px;
+            }
+
+            .meter-bar {
+                height: 6px;
+            }
+
+            .controls-grid {
+                gap: 5px;
+            }
+
+            .btn {
+                padding: 8px 4px;
+                font-size: 11px;
+                border-radius: 8px;
+            }
+
+            .warning-box {
+                padding: 6px 10px;
+            }
+
+            .breakdown-card {
+                padding: 6px 10px;
+                gap: 4px;
+            }
+
+            .logo-title {
+                font-size: 24px;
+            }
+            
+            .logo-subtitle {
+                font-size: 13px;
+                margin-bottom: 16px;
+            }
+
             .cover-hero-box {
-                height: 180px;
+                height: 140px;
+                margin-bottom: 16px;
             }
         }
     </style>
@@ -579,8 +710,8 @@
 
     <!-- Cover Screen -->
     <div id="cover-screen">
-        <div style="margin-bottom: 16px;">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2">
+        <div style="margin-bottom: 12px;">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2">
                 <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 <circle cx="12" cy="12" r="9"/>
             </svg>
@@ -589,7 +720,7 @@
         <p class="logo-subtitle">智慧空調溫控模擬器 (7秒緩衝保護版)</p>
 
         <div class="cover-hero-box">
-            <canvas id="cover-canvas" width="480" height="220"></canvas>
+            <canvas id="cover-canvas" width="440" height="180"></canvas>
         </div>
 
         <div class="cover-btns">
@@ -742,7 +873,7 @@
                 <div class="weather-info">
                     <div class="weather-title" id="ui-weather-title">天氣預報：酷暑炎熱</div>
                     <div class="weather-desc" id="ui-weather-desc">外頭陽光酷熱曝曬，目標舒適溫度為 22.0°C</div>
-                    <div id="ui-weather-req-mode" style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #0284C7;">💡 搭配模式：冷氣</div>
+                    <div id="ui-weather-req-mode" style="margin-top: 2px; font-size: 11px; font-weight: 800; color: #0284C7;">💡 搭配模式：冷氣</div>
                 </div>
             </div>
 
@@ -750,7 +881,7 @@
             <div class="goal-box">
                 <div>
                     <div class="goal-text">🏆 勝利目標：維持舒適度 ≥ 60%</div>
-                    <div style="font-size: 11px; color: #B45309;">目標最佳溫度：<span id="ui-ideal-target-text">22.0°C</span></div>
+                    <div style="font-size: 10px; color: #B45309;">目標最佳溫度：<span id="ui-ideal-target-text">22.0°C</span></div>
                 </div>
                 <div class="goal-timer" id="ui-goal-timer">0 / 25s</div>
             </div>
@@ -758,27 +889,27 @@
             <!-- Low Comfort Danger Countdown Banner -->
             <div class="warning-box" id="ui-warning-box">
                 <div style="display: flex; flex-direction: column;">
-                    <span style="font-size: 13px; font-weight: 800; color: #991B1B;">⚠️ 警告：顧客滿意度過低 (&lt;50%)</span>
-                    <span style="font-size: 11px; color: #B91C1C;" id="ui-warning-reason">請儘速調整溫度與模式，否則顧客即將離開！</span>
+                    <span style="font-size: 12px; font-weight: 800; color: #991B1B;">⚠️ 警告：顧客滿意度過低 (&lt;50%)</span>
+                    <span style="font-size: 10px; color: #B91C1C;" id="ui-warning-reason">請儘速調整溫度與模式，否則顧客即將離開！</span>
                 </div>
-                <div style="font-size: 20px; font-weight: 900; color: #DC2626;" id="ui-low-comfort-timer">50.0s</div>
+                <div style="font-size: 18px; font-weight: 900; color: #DC2626;" id="ui-low-comfort-timer">50.0s</div>
             </div>
 
             <!-- AC Breakdown Alert Banner -->
             <div class="breakdown-card" id="ui-breakdown-card">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 15px; font-weight: 800; color: #9F1239;" id="ui-breakdown-title">🚨 警告：冷氣機突發故障！</span>
-                    <span style="font-size: 12px; font-weight: 700; color: #E11D48;" id="ui-efficiency-val">效能: 50%</span>
+                    <span style="font-size: 13px; font-weight: 800; color: #9F1239;" id="ui-breakdown-title">🚨 警告：冷氣機突發故障！</span>
+                    <span style="font-size: 11px; font-weight: 700; color: #E11D48;" id="ui-efficiency-val">效能: 50%</span>
                 </div>
-                <div style="font-size: 12px; color: #881337;" id="ui-breakdown-desc">冷氣效能衰減中，請立即手動維修！</div>
-                <button class="btn btn-danger" id="btn-trigger-qte" style="padding: 10px;">🔧 啟動緊急維修 (QTE)</button>
+                <div style="font-size: 11px; color: #881337;" id="ui-breakdown-desc">冷氣效能衰減中，請立即手動維修！</div>
+                <button class="btn btn-danger" id="btn-trigger-qte" style="padding: 8px;">🔧 啟動緊急維修 (QTE)</button>
             </div>
 
             <!-- Dashboard Stats Card -->
             <div class="card">
                 <div class="card-title">
                     <span>環境與空調狀態</span>
-                    <span id="ui-power-status" style="font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #FFEBEE; color: #D32F2F;">關機中</span>
+                    <span id="ui-power-status" style="font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #FFEBEE; color: #D32F2F;">關機中</span>
                 </div>
 
                 <div class="grid-stats">
@@ -796,18 +927,18 @@
                     </div>
                 </div>
 
-                <div class="grid-stats" style="margin-top: 10px;">
+                <div class="grid-stats" style="margin-top: 6px;">
                     <div class="stat-box">
                         <div class="stat-label">運轉模式</div>
-                        <div class="stat-value" id="ui-mode" style="font-size: 16px;">冷氣</div>
+                        <div class="stat-value" id="ui-mode" style="font-size: 14px;">冷氣</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">目前風量</div>
-                        <div class="stat-value" id="ui-fan" style="font-size: 16px;">三段</div>
+                        <div class="stat-value" id="ui-fan" style="font-size: 14px;">三段</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">擺風狀態</div>
-                        <div class="stat-value" id="ui-swing" style="font-size: 16px;">關閉</div>
+                        <div class="stat-value" id="ui-swing" style="font-size: 14px;">關閉</div>
                     </div>
                 </div>
 
@@ -840,7 +971,7 @@
                 
                 <div class="controls-grid">
                     <button class="btn btn-power" id="btn-power-toggle">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/>
                         </svg>
                         <span id="txt-power-btn">開啟空調</span>
@@ -848,11 +979,11 @@
 
                     <div class="btn-group">
                         <button class="btn" id="btn-temp-down">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
                             降溫
                         </button>
                         <button class="btn" id="btn-temp-up">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                             升溫
                         </button>
                     </div>
@@ -874,7 +1005,7 @@
 
     <script>
         /**
-         * Smart AC Simulator Engine (With 7-Second Buffer Period)
+         * Smart AC Simulator Engine (Optimized for Mobile Performance)
          */
 
         const WEATHERS = [
@@ -1022,6 +1153,7 @@
             breakdownType: 'timing',
             coolingEfficiency: 1.0,
             breakdownCheckTimer: 0,
+            _brokenPowerNoise: 0.75,
             
             qte: {
                 active: false,
@@ -1547,14 +1679,14 @@
         function updateThermalPhysics() {
             if (gameState.isGameOver || gameState.isGameWon) return;
 
-            // 天氣每 20 秒切換 (已延後 5 秒)
+            // 天氣每 20 秒切換
             gameState.weatherTimer += 0.016;
             if (gameState.weatherTimer >= 20.0) {
                 gameState.weatherTimer = 0;
                 setRandomWeather();
             }
 
-            // 維修事件 15 秒觸發一次 (已延後 5 秒)
+            // 維修事件 15 秒觸發一次
             if (gameState.powerOn && !gameState.isBroken) {
                 gameState.breakdownCheckTimer += 0.016;
                 if (gameState.breakdownCheckTimer >= 15.0) {
@@ -1615,7 +1747,15 @@
                 } else if (gameState.mode === 'fan') {
                     basePower = 20 + gameState.fanSpeed * 10;
                 }
-                gameState.powerUsage = gameState.isBroken ? basePower * (0.6 + Math.random() * 0.3) : basePower;
+
+                if (gameState.isBroken) {
+                    if (Math.random() < 0.1) {
+                        gameState._brokenPowerNoise = 0.6 + Math.random() * 0.3;
+                    }
+                    gameState.powerUsage = basePower * gameState._brokenPowerNoise;
+                } else {
+                    gameState.powerUsage = basePower;
+                }
             } else {
                 const driftRate = 0.002;
                 if (gameState.indoorTemp < gameState.outdoorTemp) {
@@ -1649,28 +1789,25 @@
 
             soundFX.updateWindSound(gameState.powerOn, gameState.fanSpeed);
 
-            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯（改為 60.0% 以上即可累計勝利秒數）
+            // 🏆 勝利條件與【7秒緩衝機制】整合邏輯
             if (gameState.comfortScore >= 60.0) {
                 gameState.holdTimer += 0.016;
                 if (gameState.holdTimer >= 25.0) {
                     triggerVictory();
                 }
             } else if (gameState.comfortScore < 50.0) {
-                // 當舒適度低於 50% 時：啟動 7 秒緩衝保護期
                 if (gameState.lowComfortTimer <= gameState.bufferPeriod) {
-                    // 🛡️ 7秒緩衝期內：勝利秒數受保護，凍結不扣減
+                    // 7秒緩衝期內受保護，凍結不扣減
                 } else {
-                    // 超過 7 秒緩衝期後：開始懲罰性加速扣降進度
                     let decayRate = 0.005 + (gameState.lowComfortTimer - gameState.bufferPeriod) * 0.025;
                     gameState.holdTimer = Math.max(0, gameState.holdTimer - decayRate);
                 }
             } else {
-                // 舒適度介於 50% ~ 60% 時：常態微幅減退
                 gameState.holdTimer = Math.max(0, gameState.holdTimer - 0.005);
             }
         }
 
-        // --- Render UI ---
+        // --- Render UI (Throttled for zero flicker) ---
         function updateUI() {
             document.getElementById('ui-indoor-temp').innerText = `${gameState.indoorTemp.toFixed(1)}°C`;
             document.getElementById('ui-target-temp').innerText = `${gameState.targetTemp}°C`;
@@ -1699,11 +1836,11 @@
                 
                 if (gameState.lowComfortTimer <= gameState.bufferPeriod) {
                     const bufRemain = (gameState.bufferPeriod - gameState.lowComfortTimer).toFixed(1);
-                    document.getElementById('ui-warning-reason').innerText = `🛡️ 【7秒緩衝期】生效中 (剩數 ${bufRemain}s)，請儘速調整溫度與模式！`;
+                    document.getElementById('ui-warning-reason').innerText = `🛡️ 【7秒緩衝期】生效中 (剩數 ${bufRemain}s)，請儘速調整！`;
                 } else if (gameState.powerOn && gameState.mode !== gameState.weather.requiredMode) {
-                    document.getElementById('ui-warning-reason').innerText = `⚠️ 緩衝期已結束！模式不符當前天氣，請切換至【${gameState.weather.requiredModeName}】！`;
+                    document.getElementById('ui-warning-reason').innerText = `⚠️ 緩衝期已結束！模式不符，請切換至【${gameState.weather.requiredModeName}】！`;
                 } else {
-                    document.getElementById('ui-warning-reason').innerText = `⚠️ 緩衝期已結束！體感持續過低，勝利進度快速倒扣中！`;
+                    document.getElementById('ui-warning-reason').innerText = `⚠️ 緩衝期已結束！體感持續過低，勝利進度倒扣中！`;
                 }
             } else {
                 warningBox.classList.remove('active');
@@ -1812,17 +1949,17 @@
                 ctx.rotate(Date.now() * 0.001);
                 ctx.fillStyle = '#FACE15';
                 ctx.beginPath();
-                ctx.arc(0, 0, 22, 0, Math.PI * 2);
+                ctx.arc(0, 0, 18, 0, Math.PI * 2);
                 ctx.fill();
                 for (let i = 0; i < 8; i++) {
                     ctx.rotate(Math.PI / 4);
-                    ctx.fillRect(28, -3, 8, 6);
+                    ctx.fillRect(22, -2, 6, 4);
                 }
                 ctx.restore();
             }
 
             ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 6;
             ctx.strokeRect(winX, winY, winW, winH);
             ctx.beginPath();
             ctx.moveTo(winX + winW / 2, winY);
@@ -1835,72 +1972,72 @@
             ctx.fillStyle = '#D97706';
             ctx.beginPath();
             ctx.moveTo(plantX, plantY);
-            ctx.lineTo(plantX + 40, plantY);
-            ctx.lineTo(plantX + 32, plantY + 50);
-            ctx.lineTo(plantX + 8, plantY + 50);
+            ctx.lineTo(plantX + 30, plantY);
+            ctx.lineTo(plantX + 24, plantY + 40);
+            ctx.lineTo(plantX + 6, plantY + 40);
             ctx.closePath();
             ctx.fill();
             
-            const sway = Math.sin(Date.now() * 0.002) * 5;
+            const sway = Math.sin(Date.now() * 0.002) * 4;
             ctx.fillStyle = '#16A34A';
             ctx.beginPath();
-            ctx.ellipse(plantX + 20, plantY - 20, 15, 30 + sway, 0.2, 0, Math.PI * 2);
-            ctx.ellipse(plantX + 5, plantY - 30, 12, 25 - sway, -0.4, 0, Math.PI * 2);
-            ctx.ellipse(plantX + 35, plantY - 25, 14, 28 + sway, 0.5, 0, Math.PI * 2);
+            ctx.ellipse(plantX + 15, plantY - 15, 12, 24 + sway, 0.2, 0, Math.PI * 2);
+            ctx.ellipse(plantX + 4, plantY - 22, 10, 20 - sway, -0.4, 0, Math.PI * 2);
+            ctx.ellipse(plantX + 26, plantY - 18, 11, 22 + sway, 0.5, 0, Math.PI * 2);
             ctx.fill();
 
             // Sofa & Character
             const sofaX = w * 0.45;
-            const sofaY = floorY - 60;
+            const sofaY = floorY - 50;
             const sofaW = w * 0.42;
-            const sofaH = 80;
+            const sofaH = 65;
 
             ctx.fillStyle = '#0284C7';
             ctx.beginPath();
-            ctx.roundRect(sofaX, sofaY, sofaW, sofaH, 16);
+            ctx.roundRect(sofaX, sofaY, sofaW, sofaH, 12);
             ctx.fill();
             ctx.fillStyle = '#38BDF8';
             ctx.beginPath();
-            ctx.roundRect(sofaX + 10, sofaY - 30, sofaW - 20, 45, 12);
+            ctx.roundRect(sofaX + 8, sofaY - 24, sofaW - 16, 36, 10);
             ctx.fill();
 
-            drawCharacter(sofaX + sofaW * 0.5, sofaY + 10);
+            drawCharacter(sofaX + sofaW * 0.5, sofaY + 8);
 
             // AC Unit
             const acX = w * 0.52;
             const acY = h * 0.12;
             const acW = w * 0.38;
-            const acH = 65;
+            const acH = 55;
 
             ctx.fillStyle = '#FFFFFF';
             ctx.shadowColor = 'rgba(0,0,0,0.1)';
-            ctx.shadowBlur = 12;
+            ctx.shadowBlur = 10;
             ctx.beginPath();
-            ctx.roundRect(acX, acY, acW, acH, 12);
+            ctx.roundRect(acX, acY, acW, acH, 10);
             ctx.fill();
             ctx.shadowBlur = 0;
 
             ctx.fillStyle = '#94A3B8';
-            ctx.font = 'bold 10px sans-serif';
-            ctx.fillText('SMART AC', acX + 20, acY + 22);
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillText('SMART AC', acX + 14, acY + 18);
 
             ctx.fillStyle = '#0F172A';
-            ctx.fillRect(acX + acW - 70, acY + 14, 50, 22);
+            ctx.fillRect(acX + acW - 60, acY + 10, 44, 18);
             if (gameState.powerOn) {
                 ctx.fillStyle = gameState.isBroken ? '#F43F5E' : '#38BDF8';
-                ctx.font = 'bold 13px monospace';
-                ctx.fillText(`${Math.round(gameState.indoorTemp)}°C`, acX + acW - 64, acY + 30);
+                ctx.font = 'bold 11px monospace';
+                ctx.fillText(`${Math.round(gameState.indoorTemp)}°C`, acX + acW - 55, acY + 23);
                 
                 ctx.fillStyle = gameState.isBroken ? '#EF4444' : '#22C55E';
                 ctx.beginPath();
-                ctx.arc(acX + acW - 12, acY + 25, 4, 0, Math.PI * 2);
+                ctx.arc(acX + acW - 10, acY + 19, 3, 0, Math.PI * 2);
                 ctx.fill();
             }
 
             if (gameState.isBroken && gameState.powerOn) {
                 if (Math.random() < 0.3) {
                     ctx.fillStyle = Math.random() > 0.5 ? '#F59E0B' : '#EF4444';
-                    ctx.fillRect(acX + Math.random() * acW, acY + Math.random() * acH, 4, 4);
+                    ctx.fillRect(acX + Math.random() * acW, acY + Math.random() * acH, 3, 3);
                 }
             }
 
@@ -1908,10 +2045,10 @@
             louverAngle += (targetLouver - louverAngle) * 0.1;
 
             ctx.save();
-            ctx.translate(acX + 15, acY + acH - 6);
+            ctx.translate(acX + 12, acY + acH - 5);
             ctx.rotate((louverAngle * Math.PI) / 180);
             ctx.fillStyle = '#CBD5E1';
-            ctx.fillRect(0, 0, acW - 30, 6);
+            ctx.fillRect(0, 0, acW - 24, 5);
             ctx.restore();
 
             // Wind Particles
@@ -1919,12 +2056,12 @@
                 const spawnChance = gameState.isBroken ? 0.2 * gameState.coolingEfficiency : 0.6;
                 if (Math.random() < spawnChance) {
                     particles.push({
-                        x: acX + 30 + Math.random() * (acW - 60),
+                        x: acX + 20 + Math.random() * (acW - 40),
                         y: acY + acH,
                         vx: (-1.5 - Math.random() * 2 * (gameState.fanSpeed * 0.5)) * gameState.coolingEfficiency,
                         vy: (2 + Math.random() * 2) * gameState.coolingEfficiency,
                         alpha: 0.8,
-                        size: 3 + Math.random() * 4
+                        size: 2.5 + Math.random() * 3
                     });
                 }
             }
@@ -1968,56 +2105,56 @@
 
             ctx.fillStyle = '#FDBA74';
             ctx.beginPath();
-            ctx.arc(headX, -40, 22, 0, Math.PI * 2);
+            ctx.arc(headX, -32, 18, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#475569';
             ctx.beginPath();
-            ctx.arc(headX, -48, 22, Math.PI, Math.PI * 2);
+            ctx.arc(headX, -38, 18, Math.PI, Math.PI * 2);
             ctx.fill();
 
             ctx.strokeStyle = '#1E293B';
             ctx.lineWidth = 2;
             if (state === 'hot') {
                 ctx.beginPath();
-                ctx.moveTo(headX - 10, -42); ctx.lineTo(headX - 2, -38);
-                ctx.moveTo(headX + 10, -42); ctx.lineTo(headX + 2, -38);
+                ctx.moveTo(headX - 8, -34); ctx.lineTo(headX - 2, -30);
+                ctx.moveTo(headX + 8, -34); ctx.lineTo(headX + 2, -30);
                 ctx.stroke();
 
                 ctx.fillStyle = '#38BDF8';
                 ctx.beginPath();
-                ctx.arc(headX + 16, -45 + (Date.now() % 1000) * 0.02, 3, 0, Math.PI * 2);
+                ctx.arc(headX + 13, -36 + (Date.now() % 1000) * 0.02, 2.5, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.arc(headX, -28, 5, 0, Math.PI);
+                ctx.arc(headX, -22, 4, 0, Math.PI);
                 ctx.stroke();
             } else if (state === 'cold') {
                 ctx.beginPath();
-                ctx.arc(headX - 8, -42, 2, 0, Math.PI * 2);
-                ctx.arc(headX + 8, -42, 2, 0, Math.PI * 2);
+                ctx.arc(headX - 6, -34, 1.5, 0, Math.PI * 2);
+                ctx.arc(headX + 6, -34, 1.5, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.moveTo(headX - 6, -28);
-                ctx.lineTo(headX - 2, -30);
-                ctx.lineTo(headX + 2, -26);
-                ctx.lineTo(headX + 6, -28);
+                ctx.moveTo(headX - 5, -22);
+                ctx.lineTo(headX - 2, -24);
+                ctx.lineTo(headX + 2, -20);
+                ctx.lineTo(headX + 5, -22);
                 ctx.stroke();
             } else {
                 ctx.beginPath();
-                ctx.arc(headX - 8, -42, 4, Math.PI, 0);
-                ctx.arc(headX + 8, -42, 4, Math.PI, 0);
+                ctx.arc(headX - 6, -34, 3, Math.PI, 0);
+                ctx.arc(headX + 6, -34, 3, Math.PI, 0);
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.arc(headX, -32, 8, 0, Math.PI);
+                ctx.arc(headX, -26, 6, 0, Math.PI);
                 ctx.stroke();
             }
 
             ctx.fillStyle = state === 'hot' ? '#EF4444' : (state === 'cold' ? '#3B82F6' : '#10B981');
             ctx.beginPath();
-            ctx.roundRect(-20, -15, 40, 45, 8);
+            ctx.roundRect(-16, -12, 32, 36, 6);
             ctx.fill();
 
             ctx.restore();
@@ -2029,14 +2166,14 @@
             document.getElementById('txt-victory-msg').innerText = `恭喜！你成功維持顧客目標舒適度長達 25 秒！`;
             document.getElementById('victory-modal').classList.add('active');
 
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 80; i++) {
                 confettiParticles.push({
                     x: canvas.width / 2,
                     y: canvas.height / 2,
-                    vx: (Math.random() - 0.5) * 12,
-                    vy: -Math.random() * 10 - 4,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: -Math.random() * 8 - 3,
                     color: ['#FF5722', '#4CAF50', '#2196F3', '#FFEB3B', '#9C27B0'][Math.floor(Math.random() * 5)],
-                    size: 6 + Math.random() * 6
+                    size: 5 + Math.random() * 5
                 });
             }
         }
@@ -2225,12 +2362,19 @@
             });
         });
 
+        // Loop execution with UI update throttling to reduce frame thrashing & flicker
+        let uiFrameCounter = 0;
         function gameLoop() {
             updateThermalPhysics();
             updateQTELoop();
             updateFilterQTELoop();
             updateWaterQTELoop();
-            updateUI();
+
+            uiFrameCounter++;
+            if (uiFrameCounter % 6 === 0) {
+                updateUI();
+            }
+
             drawRoom();
             requestAnimationFrame(gameLoop);
         }
