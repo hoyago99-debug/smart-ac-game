@@ -740,7 +740,7 @@
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">🌤️</div>
-                    <div><strong>天氣與模式匹配：</strong> 天氣每 <strong>20 秒</strong> 切換。<strong>強烈寒流需開【暖氣】、炎熱酷暑需開【冷氣】、夏日陣雨需開【除濕】、怡人微風需開【送風】</strong>。</div>
+                    <div><strong>天氣與模式匹配：</strong> 天氣每 <strong>18 秒</strong> 切換。<strong>強烈寒流需開【暖氣】、炎熱酷暑需開【冷氣】、夏日陣雨需開【除濕】、怡人微風需開【送風】</strong>。</div>
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">🎛️</div>
@@ -748,7 +748,7 @@
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">⚠️</div>
-                    <div><strong>突發故障與 QTE 維修：</strong> 每 15 秒觸發一次！包含機件故障、微型濾網灰塵與高壓水槍沖洗。</div>
+                    <div><strong>突發故障與 QTE 維修：</strong> 每 13 秒觸發一次！包含機件故障、微型濾網灰塵與高壓水槍沖洗。</div>
                 </div>
                 <div class="instruction-item">
                     <div class="instruction-icon">⏱️</div>
@@ -1679,17 +1679,17 @@
         function updateThermalPhysics() {
             if (gameState.isGameOver || gameState.isGameWon) return;
 
-            // 天氣每 20 秒切換
+            // 天氣每 18 秒切換
             gameState.weatherTimer += 0.016;
-            if (gameState.weatherTimer >= 20.0) {
+            if (gameState.weatherTimer >= 18.0) {
                 gameState.weatherTimer = 0;
                 setRandomWeather();
             }
 
-            // 維修事件 15 秒觸發一次
+            // 維修事件每 13 秒觸發一次
             if (gameState.powerOn && !gameState.isBroken) {
                 gameState.breakdownCheckTimer += 0.016;
-                if (gameState.breakdownCheckTimer >= 15.0) {
+                if (gameState.breakdownCheckTimer >= 13.0) {
                     gameState.breakdownCheckTimer = 0;
                     triggerBreakdown();
                 }
